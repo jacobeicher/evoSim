@@ -13,10 +13,9 @@ class Map:
         return self.board[int(pos[0])][int(pos[1])]
 
     def checkSpace(self, pos):
-        print(pos)
         if pos[0] < 0 or pos[0] >= len(self.board):
-            return False
+            return (False, None)
         if pos[1] < 0 or pos[1] >= len(self.board):
-            return False
+            return (False, None)
 
-        return True
+        return (True, self.get(pos))
