@@ -35,7 +35,8 @@ def drawSpaceFood(i, k, background):
 
 pygame.init()
 pygame.font.init()
-textFont = pygame.font.SysFont('Georgia', 22)
+textFont = pygame.font.SysFont('Monaco', 18, bold=True)
+textFontSmall = pygame.font.SysFont('Monaco', 16)
 
 size = width, height = MAP_SIZE, MAP_SIZE+180
 
@@ -71,54 +72,63 @@ while True:
             elif event.key == pygame.K_d:
                 agent.move((1, 0))
 
-        screen.fill(black)
-        energyLabel = textFont.render(
-            'Energy: %s' % agent.getEngery(), False, orange)
-        screen.blit(energyLabel, (0, 430))
-        facingLabel = textFont.render(
-            'Facing: %s' % agent.getFacing(), False, orange)
-        screen.blit(facingLabel, (0, 460))
-
-        VisionType = textFont.render(
-            'Vision Type: %s' % agent.getSenseType(), False, orange)
-        screen.blit(VisionType, (0, 550))
-        if ev.type == pygame.MOUSEBUTTONDOWN:
-
-            if width/2 <= mouse[0] <= width/2+140 and height/2 <= mouse[1] <= height/2+40:
-                pygame.quit()
-
-        for i in range(0, MAP_SIZE, SPACE_SIZE):
-            for k in range(0, MAP_SIZE, SPACE_SIZE):
-                if agent.senseCheck((i/SPACE_SIZE, k/SPACE_SIZE)):
-                    bg = grey
-                    numOfSpacesInSight += 1
-                else:
-                    bg = black
-                if map.get((i/SPACE_SIZE, k/SPACE_SIZE)) == 'e':
-                    drawSpaceEmpty(i, k, bg)
-                elif map.get((i/SPACE_SIZE, k/SPACE_SIZE)) == 'f':
-                    drawSpaceFood(i, k, bg)
-                    if bg == grey:
-                        foodInSight += 1
-                elif map.get((i/SPACE_SIZE, k/SPACE_SIZE)) == 'a':
-                    drawSpaceAgent(i, k, bg)
-
-        SpacesInSight = textFont.render(
-            'Spaces in View: %s' % numOfSpacesInSight, False, orange)
-        screen.blit(SpacesInSight, (0, 520))
-        foodInSightLabel = textFont.render(
-            'Food In Sight: %s' % foodInSight, False, orange)
-        screen.blit(foodInSightLabel, (0, 490))
-        numOfSpacesInSight = 0
-        foodInSight = 0
-
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if mouseDelay <= 0:
+            if width/2 <= mouse[0] <= width/2+100 and 550 <= mouse[1] <= 550+40:
+                agent.setSenseType('toggle')
+            elif mouseDelay <= 0:
                 mouseDelay = 25
                 mouse_presses = pygame.mouse.get_pressed()
                 if mouse_presses[0]:
                     print((pygame.mouse.get_pos()[0] //
                            20, pygame.mouse.get_pos()[1] // 20))
-        mouseDelay -= 1
 
-        pygame.display.flip()
+    screen.fill(black)
+    energyLabel = textFont.render(
+        'Energy: %s' % agent.getEngery(), False, orange)
+    screen.blit(energyLabel, (0, 430))
+    facingLabel = textFont.render(
+        'Facing: %s' % agent.getFacing(), False, orange)
+    screen.blit(facingLabel, (0, 460))
+
+    VisionType = textFont.render(
+        'Vision Type: %s' % agent.getSenseType(), False, orange)
+    screen.blit(VisionType, (0, 550))
+
+    buttonText = textFont.render('Toggle', False, orange)
+
+    for i in range(0, MAP_SIZE, SPACE_SIZE):
+        for k in range(0, MAP_SIZE, SPACE_SIZE):
+            if agent.senseCheck((i/SPACE_SIZE, k/SPACE_SIZE)):
+                bg = grey
+                numOfSpacesInSight += 1
+            else:
+                bg = black
+            if map.get((i/SPACE_SIZE, k/SPACE_SIZE)) == 'e':
+                drawSpaceEmpty(i, k, bg)
+            elif map.get((i/SPACE_SIZE, k/SPACE_SIZE)) == 'f':
+                drawSpaceFood(i, k, bg)
+                if bg == grey:
+                    foodInSight += 1
+            elif map.get((i/SPACE_SIZE, k/SPACE_SIZE)) == 'a':
+                drawSpaceAgent(i, k, bg)
+
+    SpacesInSight = textFont.render(
+        'Spaces in View: %s' % numOfSpacesInSight, False, orange)
+    screen.blit(SpacesInSight, (0, 520))
+    foodInSightLabel = textFont.render(
+        'Food In Sight: %s' % foodInSight, False, orange)
+    screen.blit(foodInSightLabel, (0, 490))
+    mouse = pygame.mouse.get_pos()
+    if width/2 <= mouse[0] <= width/2+100 and 550 <= mouse[1] <= 590:
+        pygame.draw.rect(screen, (170, 170, 170), [width/2, 550, 100, 40])
+
+    else:
+        pygame.draw.rect(screen, (200, 200, 200), [width/2, 550, 100, 40])
+
+    screen.blit(buttonText, (width/2+15, 550+5))
+    numOfSpacesInSight = 0
+    foodInSight = 0
+
+    mouseDelay -= 1
+
+    pygame.display.flip()

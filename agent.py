@@ -35,6 +35,15 @@ class Agent:
     def getSenseType(self):
         return self.senseType
 
+    def setSenseType(self, type):
+        if type in ['wide', 'far']:
+            self.senseType = type
+        elif type == 'toggle':
+            if self.senseType == 'wide':
+                self.senseType = 'far'
+            else:
+                self.senseType = 'wide'
+
     def senseCheck(self, pos):
         if self.senseType == "wide":
             return ((self.getPos()[0] - (pos[0]))**2 + (self.getPos()[1] - (pos[1]))**2)**(1/2) <= self.getSense()
