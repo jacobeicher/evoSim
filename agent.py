@@ -1,4 +1,7 @@
-class Agent:
+from space import Empty, Food
+
+
+class Agent():
     # include traits like size, speed, sense, strength, hunger
     def __init__(self, pos, map):
         self.pos = pos
@@ -16,12 +19,12 @@ class Agent:
         spaceData = self.map.checkSpace(newPos)
         self.facing = self.getDirection(newPos)
         if spaceData[0]:
-            self.map.placeElement(self.getPos(), 'e')
+            self.map.placeElement(self.getPos(), Empty())
             self.pos = newPos
-            self.map.placeElement(self.getPos(), 'a')
+            self.map.placeElement(self.getPos(), self)
             self.energy -= 1
-        if spaceData[1] == 'f':
-            self.energy += 3
+        if isinstance(spaceData[1], Food):
+            self.energy += spaceData[1].getValue()
 
     def getPos(self):
         return self.pos

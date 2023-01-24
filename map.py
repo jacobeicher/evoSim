@@ -1,6 +1,9 @@
+from space import Food, Empty
+
+
 class Map:
     def __init__(self, spaces):
-        self.board = [['e' for i in range(spaces)]
+        self.board = [[Empty() for i in range(spaces)]
                       for j in range(spaces)]
 
     def placeElement(self, pos, type):
