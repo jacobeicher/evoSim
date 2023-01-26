@@ -1,4 +1,5 @@
 from space import Empty, Food
+import itertools
 
 
 class Agent():
@@ -8,8 +9,10 @@ class Agent():
         self.map = map
         self.energy = 500
         self.sense = 3
+        self.speed = 1
         self.senseType = "far"
         self.facing = "up"
+        self.activeZone = []
 
     def move(self, movePos):
         # successful move
@@ -25,6 +28,13 @@ class Agent():
             self.energy -= 1
         if isinstance(spaceData[1], Food):
             self.energy += spaceData[1].getValue()
+
+    def moveToward(self, pos):
+        moveList = ""
+        moveList = "h" * abs(int(pos[0] - self.getPos()[0]))
+        moveList += "v" * abs(int(pos[1] - self.getPos()[1]))
+        perms = list(itertools.permutations(moveList))
+        print(list(set(["".join(p) for p in perms])))
 
     def getPos(self):
         return self.pos
@@ -47,33 +57,11 @@ class Agent():
             else:
                 self.senseType = 'wide'
 
-    def senseCheck(self, pos):
-        if self.senseType == "wide":
-            return ((self.getPos()[0] - (pos[0]))**2 + (self.getPos()[1] - (pos[1]))**2)**(1/2) <= self.getSense()
-        if self.senseType == "far":
-            yDiff = self.getPos()[1] - pos[1]
-            xDiff = self.getPos()[0] - pos[0]
-            if self.facing == "up":
-                if yDiff > 0 and yDiff < self.sense * 2:
-                    if abs(xDiff) <= yDiff:
-                        return True
-            elif self.facing == "down":
-                if yDiff < 0 and abs(yDiff) < self.sense * 2:
-                    if abs(xDiff) <= abs(yDiff):
-                        return True
-            elif self.facing == "right":
-                if xDiff < 0 and abs(xDiff) < self.sense * 2:
-                    if abs(yDiff) <= abs(xDiff):
-                        return True
-            elif self.facing == "left":
-                if xDiff > 0 and xDiff < self.sense * 2:
-                    if abs(yDiff) <= xDiff:
-                        return True
-
-            return False
-
     def getFacing(self):
         return self.facing
+
+    def getDistance(self, pos):
+        return abs(self.getPos()[0] - pos[0]) + abs(self.getPos()[1] - pos[1])
 
     def getDirection(self, pos):
         if self.getPos()[0] - pos[0] > 0 and self.getPos()[1] == pos[1]:
@@ -84,3 +72,30 @@ class Agent():
             return "up"
         if self.getPos()[1] - pos[1] < 0 and self.getPos()[0] == pos[0]:
             return "down"
+
+    def senseCheck(self, pos):
+        if self.senseType == "wide":
+            return (abs(self.getPos()[0] - pos[0]) + abs(self.getPos()[1] - pos[1])) <= self.getSense()
+        if self.senseType == "far":
+            yDiff = self.getPos()[1] - pos[1]
+            xDiff = self.getPos()[0] - pos[0]
+            if self.facing == "up":
+                if yDiff > 0 and yDiff < self.sense * 2 - 1:
+                    if abs(xDiff) <= yDiff:
+                        return True
+            elif self.facing == "down":
+                if yDiff < 0 and abs(yDiff) < self.sense * 2 - 1:
+                    if abs(xDiff) <= abs(yDiff):
+                        return True
+            elif self.facing == "right":
+                if xDiff < 0 and abs(xDiff) < self.sense * 2 - 1:
+                    if abs(yDiff) <= abs(xDiff):
+                        return True
+            elif self.facing == "left":
+                if xDiff > 0 and xDiff < self.sense * 2 - 1:
+                    if abs(yDiff) <= xDiff:
+                        return True
+            if yDiff == 0 and xDiff == 0:
+                return True
+
+            return False

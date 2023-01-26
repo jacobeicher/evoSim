@@ -75,7 +75,7 @@ map = Map(MAP_SPACES)
 startingPlacements = random.sample(range(0, map.size()**2), 67)
 for i in startingPlacements:
     map.placeElement((int(i/MAP_SPACES), i % MAP_SPACES),
-                     Food(random.randint(1, 6)))
+                     Food(random.randint(2, 8)))
 
 agent = Agent((int(startingPlacements[66] / MAP_SPACES),
                int(startingPlacements[66] % MAP_SPACES)), map)
@@ -86,6 +86,8 @@ map.placeElement(agent.getPos(), agent)
 mouseDelay = 0
 numOfSpacesInSight = 0
 foodInSight = 0
+workingSpaces = set()
+ai = True
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -103,6 +105,8 @@ while True:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if width/3 <= mouse[0] <= width/3+100 and MAP_SIZE + 60 <= mouse[1] <= MAP_SIZE + 60+40:
                 agent.setSenseType('toggle')
+            elif width/2 <= mouse[0] <= width/2+100 and MAP_SIZE + 60 <= mouse[1] <= MAP_SIZE + 60+40:
+                ai = not ai
             elif mouseDelay <= 0:
                 mouseDelay = 25
                 mouse_presses = pygame.mouse.get_pressed()
@@ -114,33 +118,52 @@ while True:
 
     for i in range(0, MAP_SIZE, SPACE_SIZE):
         for k in range(0, MAP_SIZE, SPACE_SIZE):
-            if agent.senseCheck((i/SPACE_SIZE, k/SPACE_SIZE)):
+            point = (i/SPACE_SIZE, k/SPACE_SIZE)
+            if agent.senseCheck(point):
                 bg = grey
                 numOfSpacesInSight += 1
             else:
                 bg = black
-            if isinstance(map.get((i/SPACE_SIZE, k/SPACE_SIZE)), Empty):
+            if isinstance(map.get(point), Empty):
                 drawSpaceEmpty(i, k, bg)
-            elif isinstance(map.get((i/SPACE_SIZE, k/SPACE_SIZE)), Food):
-                drawSpaceFood(i, k, bg, map.get((i/SPACE_SIZE, k/SPACE_SIZE)))
+            elif isinstance(map.get(point), Food):
+                drawSpaceFood(i, k, bg, map.get(point))
                 if bg == grey:
                     foodInSight += 1
-            elif isinstance(map.get((i/SPACE_SIZE, k/SPACE_SIZE)), Agent):
+                    workingSpaces.add(point)
+            elif isinstance(map.get(point), Agent):
                 drawSpaceAgent(i, k, bg)
 
     mouse = pygame.mouse.get_pos()
 
-    if width/3 <= mouse[0] <= width/3+100 and 550 <= mouse[1] <= 590:
+    if width/3 <= mouse[0] <= width/3+100 and MAP_SIZE + 60 <= mouse[1] <= MAP_SIZE + 100:
         pygame.draw.rect(screen, (170, 170, 170), [
                          width/3, MAP_SIZE + 60, 100, 40])
     else:
         pygame.draw.rect(screen, (200, 200, 200), [
                          width/3, MAP_SIZE + 60, 100, 40])
 
+    pygame.draw.rect(screen, (200, 200, 200), [
+                     width/2, MAP_SIZE + 60, 100, 40])
+    bestRatio = 0
+    space = (0, 0)
+    if ai:
+        for point in workingSpaces:
+            if isinstance(map.get(point), Food):
+                ratio = map.get(point).getValue() - agent.getDistance(point)
+                if ratio > bestRatio:
+                    bestRatio = ratio
+                    space = point
+
+        print(bestRatio)
+        print(space)
+        if space != (0, 0):
+            agent.moveToward(space)
     makeLabels()
 
     numOfSpacesInSight = 0
     foodInSight = 0
     mouseDelay -= 1
+    workingSpaces = set()
 
     pygame.display.flip()
